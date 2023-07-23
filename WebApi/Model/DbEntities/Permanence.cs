@@ -1,6 +1,6 @@
 ﻿namespace Model.DbEntities
 {
-    public class Permanence
+    public class Schedule
     {
 
         public int Id { get; set; }

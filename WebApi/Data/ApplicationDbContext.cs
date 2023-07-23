@@ -14,7 +14,7 @@ namespace Data
 
         public virtual DbSet<Clinic> Clinics { get; set; }
         public virtual DbSet<Booking> Bookings { get; set; }
-        public virtual DbSet<Permanence> Permanence { get; set; }
+        public virtual DbSet<Schedule> Schedules { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

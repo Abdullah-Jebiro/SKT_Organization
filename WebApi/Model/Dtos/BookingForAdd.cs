@@ -17,7 +17,12 @@ namespace Model.Dtos
         public Gender Gender { get; set; }
         [StringLength(100, MinimumLength = 2)]
         public string phoneNumber { get; set; } = null!;
-      
 
+
+    }
+    public class ScheduleDto
+    {
+        public string Day { get; set; } = null!;
+        public string ClinicName { get; set; } = null!; 
     }
 }

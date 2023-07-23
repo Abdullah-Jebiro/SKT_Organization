@@ -71,7 +71,7 @@ namespace Services.BookingRepo
 
         public async Task<List<Clinic>> GetClinicsForBooking()
         {
-            return await _context.Permanence
+            return await _context.Schedules
                  .Where(p => p.DayOfWeek == GetDayForBooking()
                   && p.carryingCapacity > p.Clinic.Bookings.Count)
                  .Select(p=>p.Clinic)
@@ -163,6 +163,14 @@ namespace Services.BookingRepo
         public Task<List<Booking>> GetBookingForMonitoring(int? clinicId)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<List<Schedule>> GetSchedules()
+        {
+            return await _context.Schedules
+                .Include(s=>s.Clinic)
+
+                .ToListAsync();
         }
     }
 }

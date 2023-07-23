@@ -21,6 +21,7 @@ namespace Services.BookingRepo
         Task<Clinic?> GetClinic();
         Task<List<Booking>> GetPatientsForDotor(int clinicId);
         Task<List<Booking>> GetBookingForMonitoring(int? clinicId);
+        Task<List<Schedule>> GetSchedules();
 
     }
 }

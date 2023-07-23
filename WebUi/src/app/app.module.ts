@@ -15,9 +15,13 @@ import { RouterModule } from '@angular/router';
         path: 'Home',
         loadChildren: () => import('./booking/booking.module').then((b) => b.BookingModule),
       },
+      {
+        path: '',
+        loadChildren: () => import('./clinic/clinic.module').then((b) => b.ClinicModule),
+      },
 
-      { path: '', redirectTo: 'Home', pathMatch: 'full' },
-      { path: '**', redirectTo: 'Home', pathMatch: 'full' },
+      { path: '', redirectTo: 'clinic', pathMatch: 'full' },
+      { path: '**', redirectTo: 'clinic', pathMatch: 'full' },
     ]),
   ],
   providers: [],

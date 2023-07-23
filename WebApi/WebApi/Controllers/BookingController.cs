@@ -62,5 +62,16 @@ namespace WebApi.Controllers
             }
             return Ok(Clinics);
         }
+
+        [HttpGet("Schedules")]
+        public async Task<ActionResult> GetSchedules()
+        {
+            var Schedules = await _booking.GetSchedules();
+            if (Schedules == null)
+            {
+                return NotFound();
+            }
+            return Ok(_mapper.Map<List<ScheduleDto>>(Schedules));
+        }
     }
 }
