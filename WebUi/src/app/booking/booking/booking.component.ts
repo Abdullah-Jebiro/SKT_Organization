@@ -1,13 +1,10 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { catchError, throwError } from 'rxjs';
 import { ClinicService } from '../services/clinic.service';
 import { IClinic } from '../Model/IClinic';
-import { async } from '@angular/core/testing';
 import { BookingService } from '../services/Booking.service';
-import { IReservationStatus } from '../Model/IReservationStatus';
 
 @Component({
   selector: 'app-booking',
@@ -17,81 +14,80 @@ import { IReservationStatus } from '../Model/IReservationStatus';
 export class BookingComponent implements OnInit {
   bookingForm!: FormGroup;
   ipAddress!: string;
-  clinics!: IClinic[];
+  clinics: IClinic[] = [];
+  reservationStatus:boolean=true;
+
   constructor(
     private clinicService: ClinicService,
     private bookingService: BookingService,
     private fb: FormBuilder,
     private http: HttpClient
-  ) { }
+  ) {}
 
   ngOnInit() {
-    this.bookingForm = this.fb.group({
-      fullName: ['', [Validators.required, Validators.maxLength(100)]],
-      phoneNumber: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(2),
-          Validators.maxLength(100),
-        ],
-      ],
-      dateOfBirth: ['', Validators.required],
-      gender: ['', Validators.required],
-      clinicId: ['', Validators.required],
-      ipAddress: ['202.001.584.9', Validators.required]
-    });
-    this.getClinics()
-    this.getIPAddress();
-
-
-    this.bookingService.reservationStatus('').subscribe(
-      (response: IReservationStatus) => {
-        if (response.stopping) {
-          this.appendAlert(response.status + '\n' + response.stoppingTo, 'warning');
-        }
-      },
-      (error) => {
-        const errorMessage = error;
-        console.log(errorMessage, 'danger');
-      });
+    this.initForm();
+    this.getIpAddress();
+    this.getClinics();
+    
   }
 
+  initForm() {
+    this.bookingForm = this.fb.group({
+      fullName: ['', [Validators.required, Validators.maxLength(100)]],
+      phoneNumber: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      dateOfBirth: ['', Validators.required],
+      gender: [0, Validators.required],
+      clinicId: [0, Validators.required],
+      ipAddress: [null, [Validators.required, Validators.minLength(3)]],
+    });
+  }
 
-
-  onSubmit() {
-    this.bookingForm.patchValue({ ipAddress: this.ipAddress })
-    this.bookingService.submitBooking(this.bookingForm.value).subscribe(
-      (response: any) => {
-        console.log('Booking successful.', 'success');
-      },
-      (error) => {
-        const errorMessage = error;
-        console.log(errorMessage, 'danger');
-      }
-    );
+  getIpAddress() {
+    this.http.get<{ ip: string }>('https://api.ipify.org/?format=json').subscribe((data) => {
+      this.ipAddress = data.ip;
+      this.bookingForm.patchValue({ ipAddress: this.ipAddress });
+      console.log(this.ipAddress);   
+      this.checkReservationStatus();
+    });
   }
 
   getClinics() {
-    this.clinicService.getClinics().subscribe((data: any) => {
+    this.clinicService.getClinics().subscribe((data) => {
       this.clinics = data;
     });
   }
 
-  getIPAddress() {
-    this.ipAddress = '202.001.584.9'
+  checkReservationStatus(): void {
+    this.bookingService.reservationStatus(this.ipAddress).subscribe((response) => {
+      if (response.stopping) {
+        this.reservationStatus=false;
+        this.appendAlert(`${response.status}\n${response.stoppingTo}`, 'warning');
+      }
+    }, (error) => {
+      console.log('Error: Could not connect to server.', error);
+    });
   }
 
-  appendAlert = (message: string, type: string) => {
+  onSubmit() {
+    this.bookingService.submitBooking(this.bookingForm.value).subscribe((response) => {
+      console.log('Booking successful.', 'success');
+      this.bookingForm.reset();
+      this.checkReservationStatus();
+    }, (error) => {
+      console.log(error, 'danger');
+    });
+  }
+
+  appendAlert(message: string, type: string) {
     const alertPlaceholder = document.getElementById('div-message')!;
     const wrapper = document.createElement('div');
-    wrapper.innerHTML = [
-      `<div class="alert alert-${type} alert-dismissible" role="alert">`,
-      `   <div>${message}</div>`,
-      '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
-      '</div>',
-    ].join('');
+    wrapper.innerHTML = `
+      <div class="alert alert-${type} alert-dismissible" role="alert">
+        <div>${message}</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    `;
     alertPlaceholder.append(wrapper);
-  };
-
+  }
+  
 }

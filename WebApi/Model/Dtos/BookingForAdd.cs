@@ -18,11 +18,8 @@ namespace Model.Dtos
         [StringLength(100, MinimumLength = 2)]
         public string phoneNumber { get; set; } = null!;
 
+        [RegularExpression(@"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b")]
+        public string IPAddress { get; set; } = null!;
 
-    }
-    public class ScheduleDto
-    {
-        public string Day { get; set; } = null!;
-        public string ClinicName { get; set; } = null!; 
     }
 }

@@ -12,7 +12,7 @@ export class BookingService {
 
 
   reservationStatus(iPAddress: String): Observable<any> {
-    const url = 'https://localhost:7052/api/Booking?iPAddress=202.001.584.9';
+    const url = 'https://localhost:7052/api/Booking?iPAddress='+iPAddress;
     return this.http.get(url)
       .pipe(
         catchError(error => {
@@ -25,11 +25,12 @@ export class BookingService {
   submitBooking(formData: IBookingForAdd): Observable<any> {
     const url = 'https://localhost:7052/api/Booking';
 
-    console.log(formData.iPAddress);
-
-    return this.http.post<IBookingForAdd>(url, formData)
+    let bookingForAdd:IBookingForAdd ={
+     ...formData,
+      "gender":  Number(formData.gender),     
+    }
+    return this.http.post<any>(url, bookingForAdd)
       .pipe(
-        tap((data) => console.log(data)),
         catchError(error => {
           console.log('Error: Could not connect to server.', error);
           return throwError(error.message);

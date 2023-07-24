@@ -21,6 +21,9 @@ namespace Model.DbEntities
 
         [RegularExpression(@"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b")]
         public string IPAddress { get; set; } = null!;
+        public DateTime BookFor { get; set; }
+
+        
         public Clinic Clinic { get; set; } = null!;
     }
 }

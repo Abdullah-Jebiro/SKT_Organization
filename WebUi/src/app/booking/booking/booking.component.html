@@ -42,7 +42,8 @@
                         </div>
 
                         <div>
-                            <button [disabled]="bookingForm.invalid" class="submit-btn" type="submit">Ok</button>
+                            <button [disabled]="bookingForm.invalid || !reservationStatus" class="submit-btn" type="submit">Ok</button>
+                
                         </div>
                     </form>
                 </div>

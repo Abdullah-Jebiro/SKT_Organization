@@ -16,12 +16,12 @@ import { RouterModule } from '@angular/router';
         loadChildren: () => import('./booking/booking.module').then((b) => b.BookingModule),
       },
       {
-        path: '',
+        path: 'clinic',
         loadChildren: () => import('./clinic/clinic.module').then((b) => b.ClinicModule),
       },
 
-      { path: '', redirectTo: 'clinic', pathMatch: 'full' },
-      { path: '**', redirectTo: 'clinic', pathMatch: 'full' },
+      { path: '', redirectTo: 'Home', pathMatch: 'full' },
+      { path: '**', redirectTo: 'Home', pathMatch: 'full' },
     ]),
   ],
   providers: [],

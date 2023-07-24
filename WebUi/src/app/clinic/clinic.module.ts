@@ -16,7 +16,7 @@ import { HttpClientModule } from '@angular/common/http';
     HttpClientModule,
     RouterModule.forChild([
       {
-        path: '**', component:ScheduleComponent ,
+        path: '', component:ScheduleComponent ,
         
       },
      

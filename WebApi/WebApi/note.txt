@@ -1,3 +1,4 @@
 1 . The age of the patient if he is less than a year old
 2 . Clinic capacity
-
+3. ÑÓÇáÉ áãÚÑİ Çä ÇáÓÈÈ İí ipAddress
+4. return DateTime.UtcNow.AddHours(3).Date;

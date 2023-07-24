@@ -6,6 +6,7 @@ export interface IBookingForAdd {
     dateOfBirth: string;
     gender: Gender;
     phoneNumber: string;
-    iPAddress: string;
+    ipAddress:string;
+
 }
 

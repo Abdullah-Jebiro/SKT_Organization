@@ -25,20 +25,20 @@ namespace WebApi.Controllers
             _mapper = mapper;
         }
 
+
         [HttpGet]
         public async Task<ActionResult> checkReservationStatus([FromQuery]string iPAddress)
         {
             var reservationStatus = await _booking.checkReservationStatus(iPAddress);      
             return Ok(reservationStatus);
 
-
         }
 
+
         [HttpPost]
-        public async Task<ActionResult> Add(BookingForAddDto dto)
+        public async Task<ActionResult>Add(BookingForAddDto dto)
         {
             var booking = _mapper.Map<Booking>(dto);
-            booking.IPAddress = "202.001.584.9";
             await _booking.AddBooking(booking);
             return Ok();
         }
@@ -55,7 +55,20 @@ namespace WebApi.Controllers
         [HttpGet("Clinics")]
         public async Task<ActionResult> GetClinics()
         {
+               
             var Clinics = await _booking.GetClinicsForBooking();
+            if (Clinics == null)
+            {
+                return NotFound();
+            }
+            return Ok(Clinics);
+        }
+
+        [HttpGet("Clinics/{clinicsId}")]
+        public async Task<ActionResult> GetClinics(int clinicsId)
+        {
+
+            var Clinics = await _booking.GetPatientsForDotor(clinicsId);
             if (Clinics == null)
             {
                 return NotFound();

@@ -1,8 +1,11 @@
-﻿using Data;
+﻿using Core;
+using Data;
 using Microsoft.EntityFrameworkCore;
 using Model.DbEntities;
 using Model.Dtos;
 using System.ComponentModel;
+using System.Data;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Services.BookingRepo
 {
@@ -19,40 +22,57 @@ namespace Services.BookingRepo
 
         private static DayOfWeek GetDayForBooking()
         {
-            if (DateTime.UtcNow.Hour >= 8)
+            if (DateTimeLocal.GetDateTime().Hour >= 8)
             {
-                return DateTime.UtcNow.AddDays(1).DayOfWeek;
+                return DateTimeLocal.GetDateTime().AddDays(1).DayOfWeek;
 
             }
             else
             {
-                return DateTime.UtcNow.DayOfWeek;
+                return DateTimeLocal.GetDateTime().DayOfWeek;
             }
         }
 
+         public static DateTime BookFor(DateTime dateTime)
+        {
+
+            DateTime now = dateTime;
+            DateTime yesterdayAt8PM = DateTimeLocal.GetDate().AddDays(-1).AddHours(8);
+            DateTime todayAt8AM = DateTimeLocal.GetDate().AddHours(8);
+            if (now > yesterdayAt8PM && now < todayAt8AM)
+            {
+                return DateTimeLocal.GetDate().Date;
+            }
+            else
+            {
+                return DateTimeLocal.GetDate().AddDays(1).Date;
+            }
+        }
 
         public async Task AddBooking(Booking booking)
         {
+            booking.BookFor = BookFor(booking.Date);
             await _context.Bookings.AddAsync(booking);
             await _context.SaveChangesAsync();
         }
         public async Task<ReservationStatus> checkReservationStatus(string iPAddress)
         {
-            int countBookings = await _context.Bookings.CountAsync(b => b.IPAddress == iPAddress && b.Date == DateTime.UtcNow.Date);
+            int countBookings = await _context.Bookings.CountAsync(b => b.IPAddress == iPAddress
+                                             && b.Date == DateTimeLocal.GetDate().Date);
             var reservationStatus = new ReservationStatus();
 
             if (countBookings >= 3)
             {
                 reservationStatus.Status = "قم بالحجز 3 مرات اليوم  \n يمكن الحجز مرة اخرة بعد";
-                reservationStatus.stoppingTo = DateTime.UtcNow.Date.AddDays(1).AddHours(8).ToString("yyyy/MM/dd hh:mm");
+                reservationStatus.stoppingTo = DateTimeLocal.GetDate().Date.AddDays(1).AddHours(8).ToString("yyyy/MM/dd hh:mm");
                 reservationStatus.stopping = true;
             }
             else
             {
                 var temp = await _context.Bookings
-                    .OrderByDescending(b=>b.Date)
+                    .OrderByDescending(b => b.Date)
                     .FirstOrDefaultAsync(b => b.IPAddress == iPAddress
-                    && b.Date.AddMinutes(5) >DateTime.UtcNow);
+                    && b.Date.AddMinutes(5) > DateTimeLocal.GetDate());
 
                 if (temp != null)
                 {
@@ -74,7 +94,7 @@ namespace Services.BookingRepo
             return await _context.Schedules
                  .Where(p => p.DayOfWeek == GetDayForBooking()
                   && p.carryingCapacity > p.Clinic.Bookings.Count)
-                 .Select(p=>p.Clinic)
+                 .Select(p => p.Clinic)
                  .ToListAsync();
         }
 
@@ -105,8 +125,11 @@ namespace Services.BookingRepo
 
         public async Task<List<Clinic>> GetClinics()
         {
-           return await _context.Clinics.ToListAsync();
+            return await _context.Clinics.ToListAsync();
         }
+
+
+       
 
         public async Task AddClinics(Clinic clinic)
         {
@@ -117,17 +140,17 @@ namespace Services.BookingRepo
         public async Task DeleteClinics(int clinicId)
         {
             var clinic = await _context.Clinics
-                .SingleOrDefaultAsync(c=>c.ClinicId==clinicId);
+                .SingleOrDefaultAsync(c => c.ClinicId == clinicId);
             if (clinic != null)
             {
                 _context.Clinics.Remove(clinic);
                 await _context.SaveChangesAsync();
             }
-          
+
         }
 
         public async Task UpdateClinics(Clinic clinic)
-        {       
+        {
             if (clinic != null)
             {
                 _context.Clinics.Update(clinic);
@@ -144,11 +167,15 @@ namespace Services.BookingRepo
 
         public async Task<List<Booking>> GetPatientsForDotor(int clinicId)
         {
+            //TODO
             return await _context.Bookings
-           .Where(c => c.ClinicId == clinicId
-            && c.Date.AddDays(1).DayOfWeek > DateTime.UtcNow.DayOfWeek)
-           .ToListAsync();
+                .Where(c => c.ClinicId == clinicId
+                && c.BookFor.Date == DateTimeLocal.GetDate())
+                .ToListAsync();
+
         }
+
+    
 
         public Task<List<Booking>> GetBookingForMonitoring(int? clinicId , DateTime? date)
         {
@@ -169,8 +196,9 @@ namespace Services.BookingRepo
         {
             return await _context.Schedules
                 .Include(s=>s.Clinic)
-
                 .ToListAsync();
         }
+
+
     }
 }
