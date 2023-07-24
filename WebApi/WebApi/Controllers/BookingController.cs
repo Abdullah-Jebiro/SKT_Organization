@@ -68,7 +68,7 @@ namespace WebApi.Controllers
         public async Task<ActionResult> GetClinics(int clinicsId)
         {
 
-            var Clinics = await _booking.GetPatientsForDotor(clinicsId);
+            var Clinics = await _booking.GetPatientsForDoctor(clinicsId);
             if (Clinics == null)
             {
                 return NotFound();

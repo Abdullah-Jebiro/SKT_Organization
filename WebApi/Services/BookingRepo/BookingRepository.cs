@@ -1,6 +1,7 @@
 ﻿using Core;
 using Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Model.DbEntities;
 using Model.Dtos;
 using System.ComponentModel;
@@ -12,10 +13,12 @@ namespace Services.BookingRepo
     public class BookingRepository : IBookingRepository
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<BookingRepository> _logger;
 
-        public BookingRepository(ApplicationDbContext context)
+        public BookingRepository(ApplicationDbContext context , ILogger<BookingRepository> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
 
@@ -58,7 +61,8 @@ namespace Services.BookingRepo
         public async Task<ReservationStatus> checkReservationStatus(string iPAddress)
         {
             int countBookings = await _context.Bookings.CountAsync(b => b.IPAddress == iPAddress
-                                             && b.Date == DateTimeLocal.GetDate().Date);
+                                             && b.Date.Date == DateTimeLocal.GetDate().Date);
+            _logger.LogWarning(DateTimeLocal.GetDate().Date.ToString());
             var reservationStatus = new ReservationStatus();
 
             if (countBookings >= 3)
@@ -69,10 +73,12 @@ namespace Services.BookingRepo
             }
             else
             {
+                
+                _logger.LogWarning(DateTimeLocal.GetDateTime().ToString());
                 var temp = await _context.Bookings
                     .OrderByDescending(b => b.Date)
                     .FirstOrDefaultAsync(b => b.IPAddress == iPAddress
-                    && b.Date.AddMinutes(5) > DateTimeLocal.GetDate());
+                    && b.Date.AddMinutes(5) > DateTimeLocal.GetDateTime());
 
                 if (temp != null)
                 {
@@ -165,7 +171,7 @@ namespace Services.BookingRepo
 
         }
 
-        public async Task<List<Booking>> GetPatientsForDotor(int clinicId)
+        public async Task<List<Booking>> GetPatientsForDoctor(int clinicId)
         {
             //TODO
             return await _context.Bookings
