@@ -22,7 +22,6 @@ export class PatientsTableComponent {
 
   selectedClinic(event: Event) {
     const clinicId = Number((event.target as HTMLSelectElement).value);
-    console.log(clinicId);
     if (clinicId) {
       this.scheduleService.GetPatientsForDoctor(clinicId).subscribe({
         next: (data) => {
